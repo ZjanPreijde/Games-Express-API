@@ -1,7 +1,7 @@
 {
-  "name": "memory-game-api",
-  "version": "1.0.0",
-  "description": "API for memory games",
+  "name": "tictactoe-game-api",
+  "version": "1.2.3",
+  "description": "Express-API for TicTacToe games",
   "main": "index.js",
   "license": "MIT",
   "scripts": {

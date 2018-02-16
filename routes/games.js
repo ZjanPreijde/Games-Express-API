@@ -2,12 +2,12 @@
 const router = require('express').Router()
 const passport = require('../config/auth')
 const { Game } = require('../models')
-const utils = require('../lib/utils')
 
 const authenticate = passport.authorize('jwt', { session: false })
 
 module.exports = io => {
   router
+    // Fetch games
     .get('/games', (req, res, next) => {
       Game.find()
         // Newest games first
@@ -17,6 +17,8 @@ module.exports = io => {
         // Throw a 500 error if something goes wrong
         .catch((error) => next(error))
     })
+
+    // Fetch 1 game
     .get('/games/:id', (req, res, next) => {
       const id = req.params.id
 
@@ -27,15 +29,17 @@ module.exports = io => {
         })
         .catch((error) => next(error))
     })
+
+    // Add game, player 1 is current user, symbol = "X"
     .post('/games', authenticate, (req, res, next) => {
       const newGame = {
         userId: req.account._id,
         players: [{
           userId: req.account._id,
-          pairs: []
+          symbol: "X",
+          playerSquares: []
         }],
-        cards: utils.shuffle('✿✪♦✵♣♠♥✖'.repeat(2).split(''))
-          .map((symbol) => ({ visible: false, symbol }))
+        gameSquares: []
       }
 
       Game.create(newGame)
@@ -48,6 +52,8 @@ module.exports = io => {
         })
         .catch((error) => next(error))
     })
+
+    // Update game
     .put('/games/:id', authenticate, (req, res, next) => {
       const id = req.params.id
       const updatedGame = req.body
@@ -62,6 +68,8 @@ module.exports = io => {
         })
         .catch((error) => next(error))
     })
+
+    // Patch game partially
     .patch('/games/:id', authenticate, (req, res, next) => {
       const id = req.params.id
       const patchForGame = req.body
@@ -84,6 +92,8 @@ module.exports = io => {
         })
         .catch((error) => next(error))
     })
+
+    // Delete game
     .delete('/games/:id', authenticate, (req, res, next) => {
       const id = req.params.id
       Game.findByIdAndRemove(id)

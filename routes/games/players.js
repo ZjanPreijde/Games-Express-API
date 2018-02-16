@@ -26,7 +26,8 @@ const getPlayers = (req, res, next) => {
 
         return {
           userId: player.userId,
-          pairs: player.pairs,
+          symbol: player.symbol,
+          playerSquares: player.playerSquares,
           name
         }
       })
@@ -37,15 +38,19 @@ const getPlayers = (req, res, next) => {
 
 module.exports = io => {
   router
+    // Get players for this game
     .get('/games/:id/players', loadGame, getPlayers, (req, res, next) => {
       if (!req.game || !req.players) { return next() }
       res.json(req.players)
     })
 
+    // Add player to existing game, will be player2, symbol = "O"
     .post('/games/:id/players', authenticate, loadGame, (req, res, next) => {
       if (!req.game) { return next() }
 
       const userId = req.account._id
+      const symbol = "O"
+      const playerSquares = []
 
       if (req.game.players.filter((p) => p.userId.toString() === userId.toString()).length > 0) {
         const error = Error.new('You already joined this game!')
@@ -54,8 +59,7 @@ module.exports = io => {
       }
 
       // Add the user to the players
-      // req.game.players.push({ userId, pairs: [] })
-      req.game.players = [ ...req.game.players, { userId, pairs: [] } ]
+      req.game.players = [ ...req.game.players, { userId, symbol, playerSquares } ]
 
       req.game.save()
         .then((game) => {
@@ -78,6 +82,7 @@ module.exports = io => {
       res.json(req.players)
     })
 
+    // Delete player from game
     .delete('/games/:id/players', authenticate, (req, res, next) => {
       if (!req.game) { return next() }
 
