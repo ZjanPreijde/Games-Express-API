@@ -39,7 +39,7 @@ module.exports = io => {
           symbol: "X",
           playerSquares: []
         }],
-        gameSquares: []
+        gameSquares: ["", "", "", "", "", "", "", "", ""]
       }
 
       Game.create(newGame)
